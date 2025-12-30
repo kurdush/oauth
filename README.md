@@ -4,7 +4,7 @@ An interactive HTML presentation explaining OAuth 2.0 authentication protocol wi
 
 ## 🚀 Live Demo
 
-View the interactive presentation: [OAuth 2.0 Presentation](https://kurdush.github.io/oauth/)
+View the interactive presentation: [OAuth 2.0 Presentation](https://github.com/kurdush/oauth/blob/master/oauth-presentation.html)
 
 ## 📋 What's Covered
 
