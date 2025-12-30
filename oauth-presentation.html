@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Explained with Real Example</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow-x: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .slide {
+            background: white;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 90vh;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 42px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #764ba2;
+            font-size: 32px;
+            margin-bottom: 25px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Real World Example Styling */
+        .example-scenario {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .scenario-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .actors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .actor-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .actor-card:nth-child(1) { animation-delay: 0.1s; }
+        .actor-card:nth-child(2) { animation-delay: 0.2s; }
+        .actor-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .actor-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .actor-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .actor-desc {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Flow Steps */
+        .flow-container {
+            margin: 30px 0;
+        }
+
+        .flow-step {
+            display: flex;
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            animation: slideInLeft 0.6s ease-out;
+            animation-fill-mode: both;
+            position: relative;
+        }
+
+        .flow-step:nth-child(1) { animation-delay: 0.1s; }
+        .flow-step:nth-child(2) { animation-delay: 0.2s; }
+        .flow-step:nth-child(3) { animation-delay: 0.3s; }
+        .flow-step:nth-child(4) { animation-delay: 0.4s; }
+        .flow-step:nth-child(5) { animation-delay: 0.5s; }
+        .flow-step:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 22px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .step-visual {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .step-parties {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .party-tag {
+            background: #e3e8ff;
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid;
+        }
+
+        .info-box.warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .info-box.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .info-box.info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .info-box-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        /* Navigation */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .highlight {
+            background: #ffeb3b;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Real World Scenario -->
+        <div class="slide active">
+            <h1>OAuth Explained with Real Examples</h1>
+            <p class="subtitle">Understanding "Sign in with Google" and Similar Features</p>
+            <div class="content">
+                <div class="example-scenario">
+                    <div class="scenario-title">🎯 Real World Scenario</div>
+                    <p style="font-size: 16px; line-height: 1.8;">
+                        You visit a <strong>music streaming website</strong> (let's call it "TuneApp"). 
+                        Instead of creating a new account, you see a button that says 
+                        <span class="highlight">"Sign in with Google"</span>. 
+                        You click it, and within seconds, you're logged into TuneApp using your Google account!
+                    </p>
+                </div>
+
+                <h3 style="color: #764ba2; margin: 30px 0 20px 0;">Who's Involved?</h3>
+                <div class="actors">
+                    <div class="actor-card">
+                        <div class="actor-icon">👤</div>
+                        <div class="actor-name">You (Resource Owner)</div>
+                        <div class="actor-desc">The user who owns the Google account and data</div>
+                    </div>
+                    <div class="actor-card">
+                        <div class="actor-icon">🎵</div>
+                        <div class="actor-name">TuneApp (Client)</div>
+                        <div class="actor-desc">The music app that wants access to your basic Google info</div>
+                    </div>
+                    <div class="actor-card">
+                        <div class="actor-icon">🔐</div>
+                        <div class="actor-name">Google (Authorization Server)</div>
+                        <div class="actor-desc">Manages your login and decides what TuneApp can access</div>
+                    </div>
+                    <div class="actor-card">
+                        <div class="actor-icon">📁</div>
+                        <div class="actor-name">Google APIs (Resource Server)</div>
+                        <div class="actor-desc">Stores your actual data (name, email, profile picture)</div>
+                    </div>
+                </div>
+
+                <div class="info-box info">
+                    <div class="info-box-title">💡 Why OAuth?</div>
+                    <p>Without OAuth, you'd have to give TuneApp your Google password! OAuth lets TuneApp access just your name and email without ever seeing your password. You stay in control!</p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button disabled>Previous</button>
+                <button onclick="nextSlide()">Next: See OAuth 2.0 in Action</button>
+            </div>
+            <div class="slide-counter">Slide 1 of 6</div>
+        </div>
+
+        <!-- Slide 2: OAuth 2.0 Step by Step -->
+        <div class="slide">
+            <h2>OAuth 2.0: "Sign in with Google" Flow</h2>
+            <p class="subtitle">Let's see exactly what happens when you click that button</p>
+            <div class="content">
+                <div class="flow-container">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">You Click "Sign in with Google"</div>
+                            <div class="step-description">
+                                TuneApp redirects you to Google's login page. TuneApp includes its Client ID so Google knows who's asking.
+                            </div>
+                            <div class="step-visual">
+                                https://accounts.google.com/oauth/authorize?<br>
+                                &nbsp;&nbsp;client_id=tuneapp123<br>
+                                &nbsp;&nbsp;redirect_uri=https://tuneapp.com/callback<br>
+                                &nbsp;&nbsp;scope=profile email<br>
+                                &nbsp;&nbsp;response_type=code
+                            </div>
+                            <div class="step-parties">
+                                <span class="party-tag">👤 You</span>
+                                <span class="party-tag">🎵 TuneApp</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">You Log into Google</div>
+                            <div class="step-description">
+                                Google shows you a login screen. You enter your Google email and password. 
+                                <strong>TuneApp never sees your password!</strong> Only Google sees it.
+                            </div>
+                            <div class="step-parties">
+                                <span class="party-tag">👤 You</span>
+                                <span class="party-tag">🔐 Google</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Google Asks for Your Permission</div>
+                            <div class="step-description">
+                                Google shows: "TuneApp wants to access your basic profile and email. Allow?"
+                                You click "Allow" (or "Deny" if you don't trust TuneApp).
+                            </div>
+                            <div class="step-parties">
+                                <span class="party-tag">👤 You</span>
+                                <span class="party-tag">🔐 Google</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Google Sends Authorization Code</div>
+                            <div class="step-description">
+                                Google redirects you back to TuneApp with a special code (authorization code). 
+                                This code is temporary and can only be used once.
+                            </div>
+                            <div class="step-visual">
+                                https://tuneapp.com/callback?code=ABC123XYZ
+                            </div>
+                            <div class="step-parties">
+                                <span class="party-tag">🔐 Google</span>
+                                <span class="party-tag">🎵 TuneApp</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <div class="step-title">TuneApp Exchanges Code for Access Token</div>
+                            <div class="step-description">
+                                Behind the scenes, TuneApp sends the code + its Client Secret to Google and gets back an <strong>access token</strong>. 
+                                This token is like a special key that lets TuneApp access your info.
+                            </div>
+                            <div class="step-visual">
+                                POST https://oauth2.googleapis.com/token<br>
+                                code=ABC123XYZ<br>
+                                client_id=tuneapp123<br>
+                                client_secret=secret456<br>
+                                <br>
+                                → Response: { "access_token": "ya29.a0Af..." }
+                            </div>
+                            <div class="step-parties">
+                                <span class="party-tag">🎵 TuneApp</span>
+                                <span class="party-tag">🔐 Google</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">6</div>
+                        <div class="step-content">
+                            <div class="step-title">TuneApp Gets Your Info</div>
+                            <div class="step-description">
+                                TuneApp uses the access token to request your name, email, and profile picture from Google's API. 
+                                You're now logged in! 🎉
+                            </div>
+                            <div class="step-visual">
+                                GET https://www.googleapis.com/oauth2/v1/userinfo<br>
+                                Authorization: Bearer ya29.a0Af...<br>
+                                <br>
+                                → Response: { "name": "John Doe", "email": "john@gmail.com" }
+                            </div>
+                            <div class="step-parties">
+                                <span class="party-tag">🎵 TuneApp</span>
+                                <span class="party-tag">📁 Google APIs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Key Takeaway</div>
+                    <p>Your Google password stayed with Google the whole time! TuneApp only got a special token that allows limited access to what you approved.</p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevSlide()">Previous</button>
+                <button onclick="nextSlide()">Next: OAuth 1.0 Example</button>
+            </div>
+            <div class="slide-counter">Slide 2 of 6</div>
+        </div>
+
+        <!-- Slide 3: OAuth 1.0 Example -->
+        <div class="slide">
+            <h2>OAuth 1.0: Twitter Integration (Old Method)</h2>
+            <p class="subtitle">How OAuth 1.0 worked with cryptographic signatures</p>
+            <div class="content">
+                <div class="example-scenario">
+                    <div class="scenario-title">📱 Old Twitter Scenario</div>
+                    <p style="font-size: 16px; line-height: 1.8;">
+                        Before 2012, if TuneApp wanted to post to your Twitter, it used OAuth 1.0. 
+                        This required complex cryptographic signatures for security.
+                    </p>
+                </div>
+
+                <div class="flow-container">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">TuneApp Gets Request Token</div>
+                            <div class="step-description">
+                                TuneApp asks Twitter for a temporary "request token". TuneApp must sign this request with HMAC-SHA1 using its Consumer Secret.
+                            </div>
+                            <div class="step-visual">
+                                POST https://api.twitter.com/oauth/request_token<br>
+                                oauth_consumer_key=tuneapp123<br>
+                                oauth_signature_method=HMAC-SHA1<br>
+                                oauth_signature=tR3+Ty81lMeYAr/Fid0kMTYa/WM=<br>
+                                oauth_timestamp=1318622958<br>
+                                oauth_nonce=kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg<br>
+                                <br>
+                                → Response: oauth_token=Z6eEdO8MOmk&oauth_token_secret=xyz
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">You Authorize on Twitter</div>
+                            <div class="step-description">
+                                TuneApp redirects you to Twitter with the request token. You log in and authorize TuneApp.
+                            </div>
+                            <div class="step-visual">
+                                https://api.twitter.com/oauth/authorize?oauth_token=Z6eEdO8MOmk
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Twitter Returns Verifier</div>
+                            <div class="step-description">
+                                Twitter redirects back with an oauth_verifier code.
+                            </div>
+                            <div class="step-visual">
+                                https://tuneapp.com/callback?oauth_token=Z6eEdO8MOmk&oauth_verifier=9876
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Exchange for Access Token (with Signature!)</div>
+                            <div class="step-description">
+                                TuneApp exchanges the request token + verifier for an access token. 
+                                Again, this requires creating a cryptographic signature!
+                            </div>
+                            <div class="step-visual">
+                                POST https://api.twitter.com/oauth/access_token<br>
+                                oauth_consumer_key=tuneapp123<br>
+                                oauth_token=Z6eEdO8MOmk<br>
+                                oauth_verifier=9876<br>
+                                oauth_signature=another_complex_signature...<br>
+                                <br>
+                                → Response: oauth_token=finaltoken&oauth_token_secret=secret
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <div class="step-title">Every API Call Needs a Signature!</div>
+                            <div class="step-description">
+                                <strong>The big difference:</strong> In OAuth 1.0, EVERY single API request must be signed with HMAC-SHA1. 
+                                This is complex and error-prone.
+                            </div>
+                            <div class="step-visual">
+                                POST https://api.twitter.com/1.1/statuses/update.json<br>
+                                status=Hello Twitter!<br>
+                                oauth_consumer_key=tuneapp123<br>
+                                oauth_token=finaltoken<br>
+                                oauth_timestamp=1318623138<br>
+                                oauth_nonce=newrandomstring<br>
+                                oauth_signature=YET_ANOTHER_SIGNATURE...<br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Why OAuth 1.0 Was Difficult</div>
+                    <p>Creating these HMAC-SHA1 signatures for every request was complicated. Developers had to be very careful about the order of parameters, encoding, and timestamp handling. One mistake = authentication failure!</p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevSlide()">Previous</button>
+                <button onclick="nextSlide()">Next: Key Differences</button>
+            </div>
+            <div class="slide-counter">Slide 3 of 6</div>
+        </div>
+
+        <!-- Slide 4: Side by Side Comparison -->
+        <div class="slide">
+            <h2>OAuth 1.0 vs 2.0: Key Differences</h2>
+            <div class="content">
+                <table class="comparison-table">
+                    <tr>
+                        <th style="width: 30%;">Aspect</th>
+                        <th style="width: 35%;">OAuth 1.0</th>
+                        <th style="width: 35%;">OAuth 2.0</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Security Method</strong></td>
+                        <td>Cryptographic signatures (HMAC-SHA1) on every request</td>
+                        <td>HTTPS/TLS encryption (simpler bearer tokens)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Token Types</strong></td>
+                        <td>Request token → Access token (both have secrets)</td>
+                        <td>Authorization code → Access token + optional Refresh token</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Signing Requests</strong></td>
+                        <td>✅ Required - Must sign EVERY API call</td>
+                        <td>❌ Not required - Just include token in header</td>
+                    </tr>
+                    <tr>
+                        <td><strong>HTTPS Requirement</strong></td>
+                        <td>Optional (signatures work over HTTP too)</td>
+                        <td>Mandatory (relies on HTTPS for security)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Implementation Complexity</strong></td>
+                        <td>Very complex - signature generation is tricky</td>
+                        <td>Much simpler - just pass token in header</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mobile Support</strong></td>
+                        <td>Difficult - signature creation on mobile is hard</td>
+                        <td>Excellent - designed for mobile apps</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Authorization Flows</strong></td>
+                        <td>One flow (three-legged OAuth)</td>
+                        <td>Multiple flows (Authorization Code, Implicit, Client Credentials, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Token Refresh</strong></td>
+                        <td>Not built-in</td>
+                        <td>✅ Refresh tokens allow getting new access tokens</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Request Example</strong></td>
+                        <td>Must calculate: oauth_signature, oauth_timestamp, oauth_nonce, etc.</td>
+                        <td>Simply: <code>Authorization: Bearer ya29.a0Af...</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Current Status</strong></td>
+                        <td>Deprecated - no longer recommended</td>
+                        <td>Industry standard - used everywhere</td>
+                    </tr>
+                </table>
+
+                <div class="info-box success" style="margin-top: 30px;">
+                    <div class="info-box-title">🎯 Bottom Line</div>
+                    <p style="margin-bottom: 10px;"><strong>OAuth 1.0:</strong> More secure even without HTTPS, but way too complicated</p>
+                    <p><strong>OAuth 2.0:</strong> Requires HTTPS but much simpler to implement. Security through transport layer (HTTPS) instead of signatures. This is what everyone uses today!</p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevSlide()">Previous</button>
+                <button onclick="nextSlide()">Next: Code Comparison</button>
+            </div>
+            <div class="slide-counter">Slide 4 of 6</div>
+        </div>
+
+        <!-- Slide 5: Code Comparison -->
+        <div class="slide">
+            <h2>Code Examples: See the Difference</h2>
+            <div class="content">
+                <h3 style="color: #764ba2; margin-bottom: 20px;">Making an API Request</h3>
+
+                <div style="margin-bottom: 40px;">
+                    <h4 style="color: #ff6b6b; margin-bottom: 15px;">❌ OAuth 1.0 - Complex!</h4>
+                    <div class="code-block">
+// OAuth 1.0 requires generating signatures for EVERY request!
+const timestamp = Math.floor(Date.now() / 1000);
+const nonce = generateRandomString();
+
+// Must collect ALL parameters
+const params = {
+  oauth_consumer_key: 'tuneapp123',
+  oauth_token: 'user_access_token',
+  oauth_signature_method: 'HMAC-SHA1',
+  oauth_timestamp: timestamp,
+  oauth_nonce: nonce,
+  oauth_version: '1.0',
+  status: 'Hello Twitter!' // actual API parameter
+};
+
+// Create base string (order matters!)
+const baseString = 
+  'POST&' +
+  encodeURIComponent('https://api.twitter.com/1.1/statuses/update.json') + '&' +
+  encodeURIComponent(sortAndEncode(params));
+
+// Sign with HMAC-SHA1
+const signingKey = consumerSecret + '&' + tokenSecret;
+const signature = crypto.createHmac('sha1', signingKey)
+                       .update(baseString)
+                       .digest('base64');
+
+// Finally make the request with all OAuth parameters!
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 40px;">
+                    <h4 style="color: #51cf66; margin-bottom: 15px;">✅ OAuth 2.0 - Simple!</h4>
+                    <div class="code-block">
+// OAuth 2.0 is much simpler - just include the token!
+fetch('https://www.googleapis.com/youtube/v3/channels', {
+  headers: {
+    'Authorization': 'Bearer ya29.a0AfH6SMBx...' // That's it!
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));
+
+// No signatures, no complex calculations, no timestamps!
+// Just pass the access token in the Authorization header.
+                    </div>
+                </div>
+
+                <h3 style="color: #764ba2; margin: 40px 0 20px 0;">Real-World Examples</h3>
+
+                <div class="example-scenario">
+                    <div class="scenario-title">🎮 Gaming Example: "Sign in with Discord"</div>
+                    <p style="margin-top: 10px; line-height: 1.8;">
+                        <strong>Scenario:</strong> A gaming stats website wants to show your Discord username and avatar.
+                    </p>
+                    <ol style="margin: 15px 0 0 20px; line-height: 2;">
+                        <li>You click "Sign in with Discord"</li>
+                        <li>Discord asks: "GameStats wants to see your username and avatar. OK?"</li>
+                        <li>You click "Authorize"</li>
+                        <li>GameStats gets an access token (OAuth 2.0)</li>
+                        <li>GameStats calls: <code>GET https://discord.com/api/users/@me</code> with the token</li>
+                        <li>Gets back: <code>{ "username": "GamerPro", "avatar": "..." }</code></li>
+                    </ol>
+                </div>
+
+                <div class="example-scenario">
+                    <div class="scenario-title">📧 Email Example: "Sign in with Microsoft"</div>
+                    <p style="margin-top: 10px; line-height: 1.8;">
+                        <strong>Scenario:</strong> A project management tool wants to send emails on your behalf using your Outlook account.
+                    </p>
+                    <ol style="margin: 15px 0 0 20px; line-height: 2;">
+                        <li>You click "Connect Outlook"</li>
+                        <li>Microsoft asks: "ProjectApp wants to send emails as you. Allow?"</li>
+                        <li>You click "Yes"</li>
+                        <li>ProjectApp receives access token with <code>scope: Mail.Send</code></li>
+                        <li>When you assign a task, ProjectApp uses the token to send an email via Microsoft Graph API</li>
+                        <li>Your Outlook password remains secret!</li>
+                    </ol>
+                </div>
+
+                <div class="example-scenario">
+                    <div class="scenario-title">📸 Social Media: "Share to Instagram"</div>
+                    <p style="margin-top: 10px; line-height: 1.8;">
+                        <strong>Scenario:</strong> A photo editing app wants to post your edited photo directly to Instagram.
+                    </p>
+                    <ol style="margin: 15px 0 0 20px; line-height: 2;">
+                        <li>You click "Share to Instagram"</li>
+                        <li>Instagram shows: "PhotoEditor wants to post photos to your feed. Allow?"</li>
+                        <li>You approve</li>
+                        <li>PhotoEditor gets token with <code>scope: publish_content</code></li>
+                        <li>PhotoEditor uploads your photo using Instagram's API</li>
+                        <li>Photo appears on your Instagram - you stay in control!</li>
+                    </ol>
+                </div>
+
+                <div class="info-box info" style="margin-top: 30px;">
+                    <div class="info-box-title">🔑 Key Insight</div>
+                    <p>In all these examples, OAuth 2.0 lets you grant <strong>limited, revocable access</strong> without sharing your password. You can revoke access anytime from your Google/Microsoft/Discord account settings!</p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevSlide()">Previous</button>
+                <button onclick="nextSlide()">Next: Summary</button>
+            </div>
+            <div class="slide-counter">Slide 5 of 6</div>
+        </div>
+
+        <!-- Slide 6: Summary -->
+        <div class="slide">
+            <h2>Summary: What You've Learned</h2>
+            <div class="content">
+                <div class="example-scenario">
+                    <div class="scenario-title">🎯 OAuth in Simple Terms</div>
+                    <p style="font-size: 18px; line-height: 1.9; margin-top: 15px;">
+                        OAuth is like giving someone a <strong>hotel key card</strong> instead of the master key:
+                    </p>
+                    <ul style="margin: 20px 0 0 30px; line-height: 2; font-size: 16px;">
+                        <li>✅ The key card only opens certain doors (limited scope)</li>
+                        <li>✅ It expires after checkout time (temporary access)</li>
+                        <li>✅ The hotel can deactivate it anytime (revocable)</li>
+                        <li>✅ You don't give away your master key (no password sharing)</li>
+                    </ul>
+                </div>
+
+                <h3 style="color: #764ba2; margin: 40px 0 20px 0;">OAuth 1.0 vs 2.0 Recap</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div style="background: #ffe5e5; padding: 25px; border-radius: 12px; border-left: 5px solid #ff6b6b;">
+                        <h4 style="color: #ff6b6b; margin-bottom: 15px; font-size: 22px;">OAuth 1.0</h4>
+                        <ul style="list-style: none; padding: 0; line-height: 2;">
+                            <li>🔐 Cryptographic signatures required</li>
+                            <li>🔧 Very complex to implement</li>
+                            <li>📱 Difficult on mobile devices</li>
+                            <li>✅ Works without HTTPS</li>
+                            <li>❌ Deprecated (don't use anymore)</li>
+                        </ul>
+                        <p style="margin-top: 20px; font-size: 14px; font-style: italic; color: #721c24;">
+                            Used by: Old Twitter API (before 2012)
+                        </p>
+                    </div>
+
+                    <div style="background: #d4edda; padding: 25px; border-radius: 12px; border-left: 5px solid #51cf66;">
+                        <h4 style="color: #51cf66; margin-bottom: 15px; font-size: 22px;">OAuth 2.0</h4>
+                        <ul style="list-style: none; padding: 0; line-height: 2;">
+                            <li>🔓 Simple bearer tokens</li>
+                            <li>✨ Easy to implement</li>
+                            <li>📱 Perfect for mobile & web</li>
+                            <li>🔒 Requires HTTPS</li>
+                            <li>✅ Industry standard today</li>
+                        </ul>
+                        <p style="margin-top: 20px; font-size: 14px; font-style: italic; color: #155724;">
+                            Used by: Google, Facebook, Microsoft, GitHub, Discord, Spotify, etc.
+                        </p>
+                    </div>
+                </div>
+
+                <h3 style="color: #764ba2; margin: 40px 0 20px 0;">When You See OAuth in Action:</h3>
+                <div style="background: #f8f9ff; padding: 25px; border-radius: 12px; border-left: 5px solid #667eea;">
+                    <ul style="line-height: 2; font-size: 16px;">
+                        <li>🔵 "Sign in with Google" → OAuth 2.0</li>
+                        <li>🔵 "Connect your Facebook account" → OAuth 2.0</li>
+                        <li>🔵 "Authorize GitHub access" → OAuth 2.0</li>
+                        <li>🔵 "Login with Microsoft" → OAuth 2.0</li>
+                        <li>🔵 "Link your Spotify account" → OAuth 2.0</li>
+                        <li>🔵 Any app accessing your data without your password → OAuth 2.0!</li>
+                    </ul>
+                </div>
+
+                <div class="info-box success" style="margin-top: 40px;">
+                    <div class="info-box-title">🎓 Remember This!</div>
+                    <p style="font-size: 17px; line-height: 1.8;">
+                        <strong>OAuth 2.0 lets apps access your data WITHOUT your password.</strong><br><br>
+                        When you click "Sign in with Google", you're using OAuth 2.0 to give that app a temporary, limited-access key to specific information (like your name and email). You can revoke this access anytime!<br><br>
+                        <strong>OAuth 1.0</strong> did the same thing but required complex cryptographic math on every request, making it very hard for developers. That's why everyone switched to OAuth 2.0, which is simpler and just relies on HTTPS for security.
+                    </p>
+                </div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevSlide()">Previous</button>
+                <button disabled>Next</button>
+            </div>
+            <div class="slide-counter">Slide 6 of 6</div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = n;
+            slides[currentSlide].classList.add('active');
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>
